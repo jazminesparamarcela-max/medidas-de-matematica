@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medidas de Longitud - Práctica Interactiva</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --primary: #2a9d90;
+      --primary-hover: #218277;
+      --accent: #e76e50;
+      --text-color: #2b2d42;
+      --border-color: #e0e0e0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      max-width: 600px;
+      width: 100%;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 10px;
+      font-size: 1.8rem;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: #6c757d;
+      margin-bottom: 25px;
+      font-size: 0.95rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 25px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 8px 4px;
+      border: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .converter-box {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    input, select {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1rem;
+      min-width: 120px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .result {
+      margin-top: 15px;
+      padding: 12px;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      display: none;
+    }
+
+    .practice-box {
+      border-top: 2px dashed var(--border-color);
+      padding-top: 20px;
+    }
+
+    .practice-question {
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .feedback {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .feedback.correct { color: #2e7d32; }
+    .feedback.incorrect { color: #c62828; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Medidas de Longitud</h1>
+    <p class="subtitle">Conversor y práctica del Sistema Métrico Decimal</p>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>km</th>
+            <th>hm</th>
+            <th>dam</th>
+            <th>m</th>
+            <th>dm</th>
+            <th>cm</th>
+            <th>mm</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1000m</td>
+            <td>100m</td>
+            <td>10m</td>
+            <td>1m</td>
+            <td>0.1m</td>
+            <td>0.01m</td>
+            <td>0.001m</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="converter-box">
+      <div class="input-group">
+        <input type="number" id="inputValue" placeholder="Cantidad" value="1" step="any" />
+        <select id="fromUnit">
+          <option value="km">Kilómetros (km)</option>
+          <option value="hm">Hectómetros (hm)</option>
+          <option value="dam">Decámetros (dam)</option>
+          <option value="m" selected>Metros (m)</option>
+          <option value="dm">Decímetros (dm)</option>
+          <option value="cm">Centímetros (cm)</option>
+          <option value="mm">Milímetros (mm)</option>
+        </select>
+        <select id="toUnit">
+          <option value="km">Kilómetros (km)</option>
+          <option value="hm">Hectómetros (hm)</option>
+          <option value="dam">Decámetros (dam)</option>
+          <option value="m">Metros (m)</option>
+          <option value="dm">Decímetros (dm)</option>
+          <option value="cm" selected>Centímetros (cm)</option>
+          <option value="mm">Milímetros (mm)</option>
+        </select>
+      </div>
+      <button onclick="convertUnits()">Convertir</button>
+      <div id="resultBox" class="result"></div>
+    </div>
+
+    <div class="practice-box">
+      <div class="practice-question" id="practiceQuestion">Cargando ejercicio...</div>
+      <div class="input-group">
+        <input type="number" id="userAnswer" placeholder="Tu respuesta" step="any" />
+        <button style="width: auto;" onclick="checkAnswer()">Verificar</button>
+      </div>
+      <div id="practiceFeedback" class="feedback"></div>
+    </div>
+  </div>
+
+  <script>
+    const factors = {
+      km: 1000,
+      hm: 100,
+      dam: 10,
+      m: 1,
+      dm: 0.1,
+      cm: 0.01,
+      mm: 0.001
+    };
+
+    function convertUnits() {
+      const val = parseFloat(document.getElementById('inputValue').value);
+      const from = document.getElementById('fromUnit').value;
+      const to = document.getElementById('toUnit').value;
+
+      if (isNaN(val)) {
+        alert("Por favor, ingresa un número válido.");
+        return;
+      }
+
+      const valueInMeters = val * factors[from];
+      const result = valueInMeters / factors[to];
+
+      const resultBox = document.getElementById('resultBox');
+      resultBox.style.display = 'block';
+      resultBox.innerText = `${val} ${from} = ${result} ${to}`;
+    }
+
+    let currentQuiz = {};
+
+    function generateQuiz() {
+      const units = Object.keys(factors);
+      const from = units[Math.floor(Math.random() * units.length)];
+      let to = units[Math.floor(Math.random() * units.length)];
+      while (to === from) {
+        to = units[Math.floor(Math.random() * units.length)];
+      }
+
+      const value = Math.floor(Math.random() * 50) + 1;
+      const answer = (value * factors[from]) / factors[to];
+
+      currentQuiz = { value, from, to, answer };
+
+      document.getElementById('practiceQuestion').innerText = `¿Cuántos ${to} son ${value} ${from}?`;
+      document.getElementById('userAnswer').value = '';
+      document.getElementById('practiceFeedback').innerText = '';
+    }
+
+    function checkAnswer() {
+      const userVal = parseFloat(document.getElementById('userAnswer').value);
+      const feedback = document.getElementById('practiceFeedback');
+
+      if (isNaN(userVal)) return;
+
+      if (Math.abs(userVal - currentQuiz.answer) < 0.0001) {
+        feedback.className = 'feedback correct';
+        feedback.innerText = '¡Correcto! Excelente trabajo.';
+        setTimeout(generateQuiz, 1500);
+      } else {
+        feedback.className = 'feedback incorrect';
+        feedback.innerText = `Incorrecto. La respuesta era ${currentQuiz.answer} ${currentQuiz.to}`;
+      }
+    }
+
+    generateQuiz();
+  </script>
+</body>
+</html>
