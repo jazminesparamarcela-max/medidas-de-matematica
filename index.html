@@ -86,7 +86,6 @@
       display: block;
     }
 
-    /* Conversor */
     .input-group {
       display: flex;
       gap: 10px;
@@ -131,7 +130,6 @@
       display: none;
     }
 
-    /* Ejercicios */
     .quiz-card {
       background: #f8f9fa;
       border: 1px solid var(--border);
@@ -186,6 +184,114 @@
     .quiz-feedback.correct { color: var(--success); }
     .quiz-feedback.incorrect { color: var(--error); }
   </style>
+  
+  <script>
+    // Declaración global para evitar errores de referencia
+    window.switchTab = function(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      if (tabName === 'conversor') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tab-conversor').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tab-ejercicios').classList.add('active');
+        window.nuevoEjercicio();
+      }
+    };
+
+    const factors = {
+      km: 1000,
+      m: 1,
+      cm: 0.01,
+      mm: 0.001
+    };
+
+    window.convertir = function() {
+      const val = parseFloat(document.getElementById('inputValue').value);
+      const from = document.getElementById('fromUnit').value;
+      const to = document.getElementById('toUnit').value;
+
+      if (isNaN(val)) return;
+
+      const inMeters = val * factors[from];
+      const res = inMeters / factors[to];
+
+      const box = document.getElementById('resultBox');
+      box.style.display = 'block';
+      box.innerText = `${val} ${from} = ${res} ${to}`;
+    };
+
+    let correctAnswer = 0;
+    let score = 0;
+
+    window.nuevoEjercicio = function() {
+      const feedback = document.getElementById('quizFeedback');
+      if (feedback) feedback.innerText = '';
+
+      const units = ['km', 'm', 'cm', 'mm'];
+      const from = units[Math.floor(Math.random() * units.length)];
+      let to = units[Math.floor(Math.random() * units.length)];
+      while (to === from) {
+        to = units[Math.floor(Math.random() * units.length)];
+      }
+
+      const values = [1, 2, 3, 4, 5, 10, 15, 20, 50, 100];
+      const val = values[Math.floor(Math.random() * values.length)];
+
+      const inMeters = val * factors[from];
+      correctAnswer = inMeters / factors[to];
+
+      const qEl = document.getElementById('quizQuestion');
+      if (qEl) qEl.innerText = `¿Cuántos ${to} son ${val} ${from}?`;
+
+      const optionsSet = new Set();
+      optionsSet.add(correctAnswer);
+
+      while (optionsSet.size < 4) {
+        let fake;
+        const multiplier = [0.1, 10, 100, 2][Math.floor(Math.random() * 4)];
+        fake = correctAnswer * multiplier;
+        if (fake === correctAnswer) {
+          fake = correctAnswer + 5;
+        }
+        optionsSet.add(Number(fake.toFixed(4)));
+      }
+
+      const shuffledOptions = Array.from(optionsSet).sort(() => Math.random() - 0.5);
+      const container = document.getElementById('optionsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      shuffledOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = `${opt} ${to}`;
+        btn.onclick = () => window.verificarRespuesta(opt);
+        container.appendChild(btn);
+      });
+    };
+
+    window.verificarRespuesta = function(selected) {
+      const feedback = document.getElementById('quizFeedback');
+      const buttons = document.querySelectorAll('.option-btn');
+      
+      buttons.forEach(b => b.disabled = true);
+
+      if (selected === correctAnswer) {
+        feedback.className = 'quiz-feedback correct';
+        feedback.innerText = '¡Muy bien! ¡Correcto!';
+        score++;
+        document.getElementById('score').innerText = score;
+        setTimeout(window.nuevoEjercicio, 1200);
+      } else {
+        feedback.className = 'quiz-feedback incorrect';
+        feedback.innerText = `Incorrecto. Era ${correctAnswer}`;
+        setTimeout(window.nuevoEjercicio, 1800);
+      }
+    };
+  </script>
 </head>
 <body>
 
@@ -230,59 +336,5 @@
     </div>
   </div>
 
-  <script>
-    const factors = {
-      km: 1000,
-      m: 1,
-      cm: 0.01,
-      mm: 0.001
-    };
-
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-      if (tabName === 'conversor') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('tab-conversor').classList.add('active');
-      } else {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('tab-ejercicios').classList.add('active');
-        nuevoEjercicio();
-      }
-    }
-
-    function convertir() {
-      const val = parseFloat(document.getElementById('inputValue').value);
-      const from = document.getElementById('fromUnit').value;
-      const to = document.getElementById('toUnit').value;
-
-      if (isNaN(val)) return;
-
-      const inMeters = val * factors[from];
-      const res = inMeters / factors[to];
-
-      const box = document.getElementById('resultBox');
-      box.style.display = 'block';
-      box.innerText = `${val} ${from} = ${res} ${to}`;
-    }
-
-    let correctAnswer = 0;
-    let score = 0;
-
-    function nuevoEjercicio() {
-      document.getElementById('quizFeedback').innerText = '';
-      const units = ['km', 'm', 'cm', 'mm'];
-      const from = units[Math.floor(Math.random() * units.length)];
-      let to = units[Math.floor(Math.random() * units.length)];
-      while (to === from) {
-        to = units[Math.floor(Math.random() * units.length)];
-      }
-
-      const values = [1, 2, 3, 4, 5, 10, 15, 20, 50, 100];
-      const val = values[Math.floor(Math.random() * values.length)];
-
-      const inMeters = val * factors[from];
-      correctAnswer = inMeters / factors[to];
-
-      document.getElementById
+</body>
+</html>
