@@ -141,15 +141,17 @@
     }
 
     .score-board {
-      font-size: 0.9rem;
-      color: #6c757d;
+      font-size: 1rem;
+      color: #495057;
       margin-bottom: 15px;
+      font-weight: bold;
     }
 
     .question-text {
       font-size: 1.2rem;
       font-weight: bold;
       margin-bottom: 20px;
+      color: var(--text);
     }
 
     .options-grid {
@@ -178,6 +180,7 @@
     .quiz-feedback {
       font-weight: bold;
       min-height: 24px;
+      font-size: 1.05rem;
     }
 
     .quiz-feedback.correct { color: var(--success); }
@@ -228,19 +231,11 @@
   </div>
 
   <script>
-    // Factores con las 4 medidas estándar
     const factors = {
       km: 1000,
       m: 1,
       cm: 0.01,
       mm: 0.001
-    };
-
-    const names = {
-      km: "km",
-      m: "m",
-      cm: "cm",
-      mm: "mm"
     };
 
     function switchTab(tabName) {
@@ -252,4 +247,42 @@
         document.getElementById('tab-conversor').classList.add('active');
       } else {
         document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('tab-ej
+        document.getElementById('tab-ejercicios').classList.add('active');
+        nuevoEjercicio();
+      }
+    }
+
+    function convertir() {
+      const val = parseFloat(document.getElementById('inputValue').value);
+      const from = document.getElementById('fromUnit').value;
+      const to = document.getElementById('toUnit').value;
+
+      if (isNaN(val)) return;
+
+      const inMeters = val * factors[from];
+      const res = inMeters / factors[to];
+
+      const box = document.getElementById('resultBox');
+      box.style.display = 'block';
+      box.innerText = `${val} ${from} = ${res} ${to}`;
+    }
+
+    let correctAnswer = 0;
+    let score = 0;
+
+    function nuevoEjercicio() {
+      document.getElementById('quizFeedback').innerText = '';
+      const units = ['km', 'm', 'cm', 'mm'];
+      const from = units[Math.floor(Math.random() * units.length)];
+      let to = units[Math.floor(Math.random() * units.length)];
+      while (to === from) {
+        to = units[Math.floor(Math.random() * units.length)];
+      }
+
+      const values = [1, 2, 3, 4, 5, 10, 15, 20, 50, 100];
+      const val = values[Math.floor(Math.random() * values.length)];
+
+      const inMeters = val * factors[from];
+      correctAnswer = inMeters / factors[to];
+
+      document.getElementById
