@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Medidas de Longitud - Práctica Interactiva</title>
+  <title>Medidas de Longitud - Práctica</title>
   <style>
     :root {
-      --bg-color: #f4f6f9;
-      --card-bg: #ffffff;
       --primary: #2a9d90;
       --primary-hover: #218277;
-      --accent: #e76e50;
-      --text-color: #2b2d42;
-      --border-color: #e0e0e0;
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #2b2d42;
+      --border: #e0e0e0;
+      --success: #2e7d32;
+      --error: #c62828;
     }
 
     * {
@@ -23,8 +24,8 @@
     }
 
     body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -33,58 +34,59 @@
     }
 
     .container {
-      background-color: var(--card-bg);
+      background-color: var(--card);
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      max-width: 600px;
+      max-width: 550px;
       width: 100%;
-      padding: 30px;
+      padding: 25px;
     }
 
     h1 {
       text-align: center;
       color: var(--primary);
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       font-size: 1.8rem;
     }
 
     p.subtitle {
       text-align: center;
       color: #6c757d;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       font-size: 0.95rem;
     }
 
-    .table-container {
-      overflow-x: auto;
-      margin-bottom: 25px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: center;
-      font-size: 0.85rem;
-    }
-
-    th, td {
-      padding: 8px 4px;
-      border: 1px solid var(--border-color);
-    }
-
-    th {
-      background-color: var(--primary);
-      color: white;
-    }
-
-    .converter-box {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
       margin-bottom: 20px;
     }
 
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: #e9ecef;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Conversor */
     .input-group {
       display: flex;
       gap: 10px;
@@ -95,13 +97,13 @@
     input, select {
       flex: 1;
       padding: 10px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       border-radius: 6px;
       font-size: 1rem;
       min-width: 120px;
     }
 
-    button {
+    button.btn-main {
       width: 100%;
       padding: 12px;
       background-color: var(--primary);
@@ -111,18 +113,17 @@
       font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s;
     }
 
-    button:hover {
+    button.btn-main:hover {
       background-color: var(--primary-hover);
     }
 
-    .result {
+    .result-box {
       margin-top: 15px;
       padding: 12px;
       background-color: #e8f5e9;
-      color: #2e7d32;
+      color: var(--success);
       border-radius: 6px;
       text-align: center;
       font-weight: bold;
@@ -130,162 +131,125 @@
       display: none;
     }
 
-    .practice-box {
-      border-top: 2px dashed var(--border-color);
-      padding-top: 20px;
-    }
-
-    .practice-question {
-      font-weight: 600;
-      margin-bottom: 12px;
+    /* Ejercicios */
+    .quiz-card {
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
       text-align: center;
     }
 
-    .feedback {
-      text-align: center;
-      margin-top: 10px;
+    .score-board {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-bottom: 15px;
+    }
+
+    .question-text {
+      font-size: 1.2rem;
       font-weight: bold;
+      margin-bottom: 20px;
     }
 
-    .feedback.correct { color: #2e7d32; }
-    .feedback.incorrect { color: #c62828; }
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .option-btn {
+      padding: 12px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      border-color: var(--primary);
+      background: #f0fdf4;
+    }
+
+    .quiz-feedback {
+      font-weight: bold;
+      min-height: 24px;
+    }
+
+    .quiz-feedback.correct { color: var(--success); }
+    .quiz-feedback.incorrect { color: var(--error); }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h1>Medidas de Longitud</h1>
-    <p class="subtitle">Conversor y práctica del Sistema Métrico Decimal</p>
+    <p class="subtitle">Kilómetros, Metros, Centímetros y Milímetros</p>
 
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>km</th>
-            <th>hm</th>
-            <th>dam</th>
-            <th>m</th>
-            <th>dm</th>
-            <th>cm</th>
-            <th>mm</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1000m</td>
-            <td>100m</td>
-            <td>10m</td>
-            <td>1m</td>
-            <td>0.1m</td>
-            <td>0.01m</td>
-            <td>0.001m</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab('conversor')">Conversor</button>
+      <button class="tab-btn" onclick="switchTab('ejercicios')">Ejercicios</button>
     </div>
 
-    <div class="converter-box">
+    <!-- Pestaña 1: Conversor -->
+    <div id="tab-conversor" class="tab-content active">
       <div class="input-group">
         <input type="number" id="inputValue" placeholder="Cantidad" value="1" step="any" />
         <select id="fromUnit">
           <option value="km">Kilómetros (km)</option>
-          <option value="hm">Hectómetros (hm)</option>
-          <option value="dam">Decámetros (dam)</option>
           <option value="m" selected>Metros (m)</option>
-          <option value="dm">Decímetros (dm)</option>
           <option value="cm">Centímetros (cm)</option>
           <option value="mm">Milímetros (mm)</option>
         </select>
         <select id="toUnit">
           <option value="km">Kilómetros (km)</option>
-          <option value="hm">Hectómetros (hm)</option>
-          <option value="dam">Decámetros (dam)</option>
           <option value="m">Metros (m)</option>
-          <option value="dm">Decímetros (dm)</option>
           <option value="cm" selected>Centímetros (cm)</option>
           <option value="mm">Milímetros (mm)</option>
         </select>
       </div>
-      <button onclick="convertUnits()">Convertir</button>
-      <div id="resultBox" class="result"></div>
+      <button class="btn-main" onclick="convertir()">Convertir</button>
+      <div id="resultBox" class="result-box"></div>
     </div>
 
-    <div class="practice-box">
-      <div class="practice-question" id="practiceQuestion">Cargando ejercicio...</div>
-      <div class="input-group">
-        <input type="number" id="userAnswer" placeholder="Tu respuesta" step="any" />
-        <button style="width: auto;" onclick="checkAnswer()">Verificar</button>
+    <!-- Pestaña 2: Ejercicios -->
+    <div id="tab-ejercicios" class="tab-content">
+      <div class="quiz-card">
+        <div class="score-board">Aciertos: <span id="score">0</span></div>
+        <div class="question-text" id="quizQuestion">Cargando pregunta...</div>
+        <div class="options-grid" id="optionsContainer"></div>
+        <div id="quizFeedback" class="quiz-feedback"></div>
       </div>
-      <div id="practiceFeedback" class="feedback"></div>
     </div>
   </div>
 
   <script>
+    // Factores con las 4 medidas estándar
     const factors = {
       km: 1000,
-      hm: 100,
-      dam: 10,
       m: 1,
-      dm: 0.1,
       cm: 0.01,
       mm: 0.001
     };
 
-    function convertUnits() {
-      const val = parseFloat(document.getElementById('inputValue').value);
-      const from = document.getElementById('fromUnit').value;
-      const to = document.getElementById('toUnit').value;
+    const names = {
+      km: "km",
+      m: "m",
+      cm: "cm",
+      mm: "mm"
+    };
 
-      if (isNaN(val)) {
-        alert("Por favor, ingresa un número válido.");
-        return;
-      }
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-      const valueInMeters = val * factors[from];
-      const result = valueInMeters / factors[to];
-
-      const resultBox = document.getElementById('resultBox');
-      resultBox.style.display = 'block';
-      resultBox.innerText = `${val} ${from} = ${result} ${to}`;
-    }
-
-    let currentQuiz = {};
-
-    function generateQuiz() {
-      const units = Object.keys(factors);
-      const from = units[Math.floor(Math.random() * units.length)];
-      let to = units[Math.floor(Math.random() * units.length)];
-      while (to === from) {
-        to = units[Math.floor(Math.random() * units.length)];
-      }
-
-      const value = Math.floor(Math.random() * 50) + 1;
-      const answer = (value * factors[from]) / factors[to];
-
-      currentQuiz = { value, from, to, answer };
-
-      document.getElementById('practiceQuestion').innerText = `¿Cuántos ${to} son ${value} ${from}?`;
-      document.getElementById('userAnswer').value = '';
-      document.getElementById('practiceFeedback').innerText = '';
-    }
-
-    function checkAnswer() {
-      const userVal = parseFloat(document.getElementById('userAnswer').value);
-      const feedback = document.getElementById('practiceFeedback');
-
-      if (isNaN(userVal)) return;
-
-      if (Math.abs(userVal - currentQuiz.answer) < 0.0001) {
-        feedback.className = 'feedback correct';
-        feedback.innerText = '¡Correcto! Excelente trabajo.';
-        setTimeout(generateQuiz, 1500);
+      if (tabName === 'conversor') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tab-conversor').classList.add('active');
       } else {
-        feedback.className = 'feedback incorrect';
-        feedback.innerText = `Incorrecto. La respuesta era ${currentQuiz.answer} ${currentQuiz.to}`;
-      }
-    }
-
-    generateQuiz();
-  </script>
-</body>
-</html>
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tab-ej
