@@ -38,7 +38,7 @@
       background-color: var(--card);
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      max-width: 600px;
+      max-width: 650px;
       width: 100%;
       padding: 25px;
     }
@@ -57,7 +57,7 @@
       font-size: 0.95rem;
     }
 
-    /* Patrón de Medidas y Regla Visual (SIEMPRE VISIBLE) */
+    /* Patrón de Medidas Completo */
     .pattern-box {
       background: #eef9f8;
       border: 2px solid var(--primary);
@@ -79,30 +79,31 @@
       justify-content: space-between;
       align-items: center;
       background: white;
-      padding: 12px;
+      padding: 10px;
       border-radius: 8px;
       border: 1px solid var(--border);
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       margin-bottom: 10px;
+      overflow-x: auto;
     }
 
     .unit-step {
-      padding: 6px 12px;
+      padding: 4px 8px;
       background: #f0fdf4;
       border: 1px solid var(--primary);
-      border-radius: 6px;
+      border-radius: 4px;
       color: var(--primary);
+      white-space: nowrap;
     }
 
     .arrow-indicator {
       color: var(--accent);
-      font-size: 0.9rem;
-      font-weight: normal;
+      font-size: 0.8rem;
     }
 
     .rule-explanation {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: #495057;
       line-height: 1.4;
       text-align: left;
@@ -243,6 +244,11 @@
   </style>
 
   <script>
+    function formatearNumero(num) {
+      if (isNaN(num)) return num;
+      return Number(num).toLocaleString('es-AR', { maximumFractionDigits: 6 });
+    }
+
     window.switchTab = function(tabName) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -253,15 +259,30 @@
       } else {
         document.querySelectorAll('.tab-btn')[1].classList.add('active');
         document.getElementById('tab-ejercicios').classList.add('active');
-        window.nuevoEjercicio();
+        if (!currentQuizData.from) {
+          window.nuevoEjercicio();
+        }
       }
     };
 
     const factors = {
       km: 1000,
+      hm: 100,
+      dam: 10,
       m: 1,
+      dm: 0.1,
       cm: 0.01,
       mm: 0.001
+    };
+
+    const unitNames = {
+      km: "kilómetros",
+      hm: "hectómetros",
+      dam: "decámetros",
+      m: "metros",
+      dm: "decímetros",
+      cm: "centímetros",
+      mm: "milímetros"
     };
 
     window.convertir = function() {
@@ -276,7 +297,7 @@
 
       const box = document.getElementById('resultBox');
       box.style.display = 'block';
-      box.innerText = `${val} ${from} = ${res} ${to}`;
+      box.innerText = `${formatearNumero(val)} ${from} = ${formatearNumero(res)} ${to}`;
     };
 
     let correctAnswer = 0;
@@ -287,14 +308,14 @@
       const feedback = document.getElementById('quizFeedback');
       if (feedback) feedback.innerText = '';
 
-      const units = ['km', 'm', 'cm', 'mm'];
+      const units = ['km', 'hm', 'dam', 'm', 'dm', 'cm', 'mm'];
       const from = units[Math.floor(Math.random() * units.length)];
       let to = units[Math.floor(Math.random() * units.length)];
       while (to === from) {
         to = units[Math.floor(Math.random() * units.length)];
       }
 
-      const values = [1, 2, 3, 4, 5, 10, 15, 20, 50, 100];
+      const values = [1, 2, 5, 10, 25, 50, 100, 200, 500, 1000];
       const val = values[Math.floor(Math.random() * values.length)];
 
       const inMeters = val * factors[from];
@@ -303,19 +324,30 @@
       currentQuizData = { val, from, to };
 
       const qEl = document.getElementById('quizQuestion');
-      if (qEl) qEl.innerText = `¿Cuántos ${to} son ${val} ${from}?`;
+      if (qEl) qEl.innerText = `¿Cuántos ${to} (${unitNames[to]}) son ${formatearNumero(val)} ${from}?`;
 
+      // Generación segura de opciones falsas para evitar bloqueos
       const optionsSet = new Set();
-      optionsSet.add(correctAnswer);
+      optionsSet.add(Number(correctAnswer.toFixed(6)));
 
-      while (optionsSet.size < 4) {
+      let intentos = 0;
+      while (optionsSet.size < 4 && intentos < 50) {
+        intentos++;
         let fake;
-        const multiplier = [0.1, 10, 100, 2][Math.floor(Math.random() * 4)];
-        fake = correctAnswer * multiplier;
-        if (fake === correctAnswer) {
-          fake = correctAnswer + 5;
+        const randomFactor = [0.1, 10, 100, 0.01, 2, 0.5][Math.floor(Math.random() * 6)];
+        fake = correctAnswer * randomFactor;
+        
+        if (fake === correctAnswer || fake <= 0) {
+          fake = correctAnswer + (intentos * 2);
         }
-        optionsSet.add(Number(fake.toFixed(4)));
+        optionsSet.add(Number(fake.toFixed(6)));
+      }
+
+      // Si por alguna razón exótica faltaran opciones, rellenar de forma segura
+      let fallbackCounter = 1;
+      while (optionsSet.size < 4) {
+        optionsSet.add(Number((correctAnswer + fallbackCounter).toFixed(6)));
+        fallbackCounter++;
       }
 
       const shuffledOptions = Array.from(optionsSet).sort(() => Math.random() - 0.5);
@@ -326,7 +358,7 @@
       shuffledOptions.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
-        btn.innerText = `${opt} ${to}`;
+        btn.innerText = `${formatearNumero(opt)} ${to}`;
         btn.onclick = () => window.verificarRespuesta(opt);
         container.appendChild(btn);
       });
@@ -339,18 +371,18 @@
       buttons.forEach(b => b.disabled = true);
 
       const isBiggerToSmaller = factors[currentQuizData.from] > factors[currentQuizData.to];
-      const opText = isBiggerToSmaller ? "multiplica" : "divide";
+      const opText = isBiggerToSmaller ? "multiplica (agrega ceros / corre la coma a la derecha)" : "divide (quita ceros / corre la coma a la izquierda)";
 
-      if (selected === correctAnswer) {
+      if (Math.abs(selected - correctAnswer) < 0.000001) {
         feedback.className = 'quiz-feedback correct';
-        feedback.innerText = `¡Correcto! Se ${opText} porque vas de ${currentQuizData.from} a ${currentQuizData.to}.`;
+        feedback.innerText = `¡Correcto! Como vas de ${currentQuizData.from} a ${currentQuizData.to}, se ${opText}.`;
         score++;
         document.getElementById('score').innerText = score;
-        setTimeout(window.nuevoEjercicio, 2200);
+        setTimeout(window.nuevoEjercicio, 2500);
       } else {
         feedback.className = 'quiz-feedback incorrect';
-        feedback.innerText = `Incorrecto. Para pasar de ${currentQuizData.from} a ${currentQuizData.to} se ${opText}. Era ${correctAnswer} ${currentQuizData.to}.`;
-        setTimeout(window.nuevoEjercicio, 3000);
+        feedback.innerText = `Incorrecto. Para pasar de ${currentQuizData.from} a ${currentQuizData.to} se ${opText}. Era ${formatearNumero(correctAnswer)} ${currentQuizData.to}.`;
+        setTimeout(window.nuevoEjercicio, 3500);
       }
     };
   </script>
@@ -359,44 +391,57 @@
 
   <div class="container">
     <h1>Medidas de Longitud</h1>
-    <p class="subtitle">Kilómetros, Metros, Centímetros y Milímetros</p>
+    <p class="subtitle">Sistema Métrico Decimal Completo</p>
 
-    <!-- PATRÓN DE MEDIDAS VISIBLE EN TODO MOMENTO -->
+    <!-- PATRÓN DE MEDIDAS COMPLETO Y VISIBLE -->
     <div class="pattern-box">
       <div class="pattern-title">Patrón de Medidas de Longitud</div>
       <div class="units-stair">
         <span class="unit-step">km</span>
         <span class="arrow-indicator">➔</span>
+        <span class="unit-step">hm</span>
+        <span class="arrow-indicator">➔</span>
+        <span class="unit-step">dam</span>
+        <span class="arrow-indicator">➔</span>
         <span class="unit-step">m</span>
+        <span class="arrow-indicator">➔</span>
+        <span class="unit-step">dm</span>
         <span class="arrow-indicator">➔</span>
         <span class="unit-step">cm</span>
         <span class="arrow-indicator">➔</span>
         <span class="unit-step">mm</span>
       </div>
       <div class="rule-explanation">
-        • <strong>De MAYOR a menor (➔ Derecha):</strong> Se <strong>MULTIPLICA</strong> (agregar ceros o correr la coma a la derecha).<br>
-        • <strong>De MENOR a mayor (⬅ Izquierda):</strong> Se <strong>DIVIDE</strong> (quitar ceros o correr la coma a la izquierda).
+        • <strong>De MAYOR a menor (➔ Derecha):</strong> Se <strong>MULTIPLICA</strong> por 10 por cada lugar (agrega ceros o corre la coma a la derecha).<br>
+        • <strong>De MENOR a mayor (⬅ Izquierda):</strong> Se <strong>DIVIDE</strong> por 10 por cada lugar (quita ceros o corre la coma a la izquierda).
       </div>
     </div>
 
     <div class="tab-buttons">
-      <button class="tab-btn active" onclick="switchTab('conversor')">Conversor</button>
+      <button class="tab-btn active" onclick="switchTab('conversor')">Calculadora / Conversor</button>
       <button class="tab-btn" onclick="switchTab('ejercicios')">Ejercicios</button>
     </div>
 
-    <!-- Pestaña 1: Conversor -->
+    <!-- Pestaña 1: Conversor (Calculadora libre) -->
     <div id="tab-conversor" class="tab-content active">
+      <p style="font-size: 0.9rem; color: #6c757d; margin-bottom: 10px;">Podés usar esta calculadora para verificar tus dudas antes de responder los ejercicios:</p>
       <div class="input-group">
         <input type="number" id="inputValue" placeholder="Cantidad" value="1" step="any" />
         <select id="fromUnit">
           <option value="km">Kilómetros (km)</option>
+          <option value="hm">Hectómetros (hm)</option>
+          <option value="dam">Decámetros (dam)</option>
           <option value="m" selected>Metros (m)</option>
+          <option value="dm">Decímetros (dm)</option>
           <option value="cm">Centímetros (cm)</option>
           <option value="mm">Milímetros (mm)</option>
         </select>
         <select id="toUnit">
           <option value="km">Kilómetros (km)</option>
+          <option value="hm">Hectómetros (hm)</option>
+          <option value="dam">Decámetros (dam)</option>
           <option value="m">Metros (m)</option>
+          <option value="dm">Decímetros (dm)</option>
           <option value="cm" selected>Centímetros (cm)</option>
           <option value="mm">Milímetros (mm)</option>
         </select>
